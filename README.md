@@ -7,7 +7,7 @@ A collection of Dockerfiles for development, CI/CD pipelines and production.
 The base image for `dev` related Dockerfiles are parameterized. So, they can be built based on any debian-like base image and on top of each other. The idea is to build containers as the development workspace (developing within the container).
 For example, in the following `golang/dev/Dockerfile` will be built based on the latest debian image.
 ```sh
-docker build golang/debian/ -t my-golang --build-arg BASE_IMAGE=debian:latest
+docker build golang/dev/ -t my-golang --build-arg BASE_IMAGE=debian:latest
 ```
 
 ### Quick build
@@ -30,7 +30,7 @@ id.
 The followings build a local shell image based on official ubuntu image 
 using the current hosts's user id.
 
-```
+```sh
 docker build shell/debian/ -t shell-local:ubuntu-latest \
 	--build-arg BASE_IMAGE=ubuntu:latest \
 	--build-arg USER_ID=$(id -u ${USER}) \
