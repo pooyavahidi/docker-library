@@ -19,10 +19,10 @@ build_scripts/build_dev.sh
 ```
 Note: the value of `CONTAINER_REG_ALIAS` should be ended with `/`. This is just a prefix to the image tag name. So, if you want to use it locally, you don't need to provide a valid username.
 
-# Shell images
+## Shell images
 These images are intended for local development and tests. They create a user within the container which uses a high range id of 61000 (to not overlap with any potential host user ids). 
 
-## Create a shell image with host's current user id
+### Create a shell image with host's current user id
 In order to develop using a container and mount the source code directory of
 the host as a volume, we need to give a write permission to the container's user
 id. 
