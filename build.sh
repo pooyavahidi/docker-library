@@ -68,8 +68,8 @@ done
 
 set -eu
 
-# Build images ordered based on the images array.
-# Each image is the base of the next one
+# Build images ordered based on the images array. Each image is the base for
+# the next one.
 for image in "${images[@]}"; do
     docker build ${image}/${distro_like}/ -t ${image_tag} \
         --build-arg BASE_IMAGE=${base_image}
