@@ -1,3 +1,4 @@
+ARG BASE_IMAGE
 FROM golang:1.16.2-alpine3.13 as builder
 
 ARG HUGO_VERSION=v0.82.0
@@ -18,12 +19,13 @@ RUN set -eux; \
 	hugo version; \
     apk del .build-deps
 
-RUN apk add bash
+RUN apk add bash \
+			curl \
+			unzip
 
-FROM alpine:3.13
+FROM ${BASE_IMAGE}
 COPY --from=builder /go/bin/ bin/
 RUN apk update \
 	&& apk add bash
-
 
 CMD ["/bin/bash"]

@@ -8,5 +8,3 @@ RUN set -eux \
 	&& tsc --version \
 	&& npm install -g aws-cdk \
 	&& cdk --version
-
-

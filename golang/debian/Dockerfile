@@ -28,8 +28,8 @@ RUN	set -eux; \
 		echo "$sha256 *go.tgz" | sha256sum --strict --check -; \
 		\
 		export GNUPGHOME="$(mktemp -d)"; \
-# Verify the signature of downloaded packages 
-# https://www.google.com/linuxrepositories/
+        # Verify the signature of downloaded packages 
+        # https://www.google.com/linuxrepositories/
 		gpg --batch --keyserver ha.pool.sks-keyservers.net --recv-keys 'EB4C 1BFD 4F04 2F6D DDCC EC91 7721 F63B D38B 4796'; \
 		gpg --batch --verify go.tgz.asc go.tgz; \
 		gpgconf --kill all; \
@@ -38,7 +38,7 @@ RUN	set -eux; \
 		tar -C /usr/local -xzf go.tgz; \
 		rm go.tgz; \
 		\
-# Check the go version and verify the installation
+        # Check the go version and verify the installation
 		go version
 
 

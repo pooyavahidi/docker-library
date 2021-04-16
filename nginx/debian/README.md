@@ -1,4 +1,4 @@
-# Push image to aws ecr
+# Nginx container with self-signed tls
 
 ```
 $ docker build -t nginx-tls .
