@@ -33,7 +33,7 @@ RUN	set -eux; \
 	# Verify the signature of downloaded packages 
 	gpg --import awscli_public_key; \
 	gpg --verify awscliv2.zip.sig awscliv2.zip; \
-	unzip awscliv2.zip
+	unzip -q awscliv2.zip
 
 FROM ${BASE_IMAGE}
 COPY --from=builder /tmp/aws /tmp/
