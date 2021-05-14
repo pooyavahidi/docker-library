@@ -4,6 +4,7 @@ FROM ${BASE_IMAGE}
 # Install prerequisites 
 RUN apt-get update \
 	&& apt-get install -y \
+		git \
 		rsync \
 		tmux \
 		tree \
