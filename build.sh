@@ -12,11 +12,11 @@ function print-usage {
          "of Dockerfiles. No space between the images"
     echo "-t | --image-tag <image_tag>              the tag name for the" \
          "final image"
-    echo "-s | --shell <image_tag>                  adds the shell image as" \
-         "the final image"
-    echo "-c | --current-user-shell <image_tag>     set the current host's" \
-         "USER_ID as the" \
-         "container's internal USER"
+    echo "-s | --shell <image_tag>                  adds a shell image" \
+         "on top of the final image"
+    echo "-c | --current-user-shell <image_tag>     adds a shell image on top" \
+	     "of the final image using the current host's USER_ID as the" \
+		 "container's internal USER"
 	echo "Example:"
 	echo "build.sh -d debian -b ubuntu:20.04 -i python,nodejs -t pv/dev:latest" \
          "-s shell:latest -c shell-local:latest"
