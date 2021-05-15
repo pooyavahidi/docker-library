@@ -20,7 +20,15 @@ RUN set -eux; \
 	hugo version; \
 	rm -rf /var/lib/apt/lists/*;
 
+# Build the final image
 FROM ${BASE_IMAGE}
+
 COPY --from=builder /go/bin/ bin/
+
+# Install tools for fetching hugo repos and building them
+RUN set -eux \
+	&& apt-get update \
+	&& apt-get install -y \
+		git
 
 CMD ["/bin/bash"]
