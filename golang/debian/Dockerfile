@@ -8,18 +8,18 @@ RUN apt-get update \
 		wget
 
 ENV PATH /usr/local/go/bin:$PATH
-ENV GOLANG_VERSION 1.16.2
+ENV GOLANG_VERSION 1.16.5
 
 RUN	set -eux; \
 		dpkgArch=$(dpkg --print-architecture); \
 		case "${dpkgArch##-}" in \
 			"amd64") \
-				url="https://golang.org/dl/go1.16.2.linux-amd64.tar.gz"; \
-				sha256="542e936b19542e62679766194364f45141fde55169db2d8d01046555ca9eb4b8"; \
+				url="https://golang.org/dl/go1.16.5.linux-amd64.tar.gz"; \
+				sha256="b12c23023b68de22f74c0524f10b753e7b08b1504cb7e417eccebdd3fae49061"; \
 				;; \
 			"arm64") \
-				url="https://golang.org/dl/go1.16.2.linux-arm64.tar.gz"; \
-				sha256="6924601d998a0917694fd14261347e3798bd2ad6b13c4d7f2edd70c9d57f62ab"; \
+				url="https://golang.org/dl/go1.16.5.linux-arm64.tar.gz"; \
+				sha256="d5446b46ef6f36fdffa852f73dfbbe78c1ddf010b99fa4964944b9ae8b4d6799"; \
 				;; \
 			*) echo "error: unsupported architecture ${dpkgArch}"; exit 1 ;; \
 		esac; \
