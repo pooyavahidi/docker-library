@@ -25,11 +25,17 @@ the host as a volume, we need to give a write permission to the container's user
 id. 
 
 The followings build a local shell image based on official ubuntu image 
-using the current hosts's user id.
+using the current host's user and group IDs.
 
 ```sh
 docker build shell/debian/ -t shell-local:ubuntu-latest \
 	--build-arg BASE_IMAGE=ubuntu:latest \
 	--build-arg USER_ID=$(id -u ${USER}) \
 	--build-arg GROUP_ID=$(id -g ${USER})
+```
+## Build images locally using build.sh
+The following command builds a dev container `pv/dev:latest` based on three images of ubuntu:20.04, python and nodejs (with this order). It also creates two additional shell images on top of the `pv/dev` image. `shell:latest` is a shell layer on top of the `pv/dev`, and `shell-local:latest` is a shell layer using current host's user and group IDs.
+```sh
+./build.sh -d debian -b ubuntu:20.04 -i python,nodejs -t pv/dev:latest \
+         -s shell:latest -c shell-local:latest
 ```
