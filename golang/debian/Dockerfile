@@ -30,7 +30,7 @@ RUN	set -eux; \
 		export GNUPGHOME="$(mktemp -d)"; \
         # Verify the signature of downloaded packages 
         # https://www.google.com/linuxrepositories/
-		gpg --batch --keyserver ha.pool.sks-keyservers.net --recv-keys 'EB4C 1BFD 4F04 2F6D DDCC EC91 7721 F63B D38B 4796'; \
+		gpg --batch --keyserver keyserver.ubuntu.com --recv-keys 'EB4C 1BFD 4F04 2F6D DDCC EC91 7721 F63B D38B 4796'; \
 		gpg --batch --verify go.tgz.asc go.tgz; \
 		gpgconf --kill all; \
 		rm -rf "$GNUPGHOME" go.tgz.asc; \
