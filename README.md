@@ -35,8 +35,17 @@ docker build shell/debian/ -t shell-local:ubuntu-latest \
 ```
 ## Build images locally using build.sh
 `build.sh` is a simple shell script for building images locally. In the following, it first pulls the official `ubuntu:20.04`, then builds a dev container `pv/dev:latest` based on three images of ubuntu:20.04, python and nodejs (ordered). It also creates two optional shell images on top of the `pv/dev` image. `pv/shell:latest` which is a shell layer on top of the `pv/dev`, and `pv/shell-local:latest` which is a shell layer using the current host's user and group IDs.
+
 ```sh
 docker pull ubuntu:20.04
-./build.sh -d debian -b ubuntu:20.04 -i python,nodejs -t pv/dev:latest \
-         -s pv/shell:latest -c pv/shell-local:latest
 ```
+Build the `dev`, `shell` and `shell-local` image.
+```sh
+./build.sh -d debian -b ubuntu:20.04 \
+    -i python,nodejs,golang,awscli \
+    -t pv/dev:latest \
+    -s pv/shell:latest \
+    -c pv/shell-local:latest
+```
+For MacOS and Windows, remove the `shell-local` option. Instead of creating `shell-local` just create a `shell`
+container and use Docker Desktop file sharing to share host's directories.
