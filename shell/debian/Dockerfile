@@ -15,12 +15,14 @@ RUN apt-get update \
 
 # Internal username named `cu` short for `Container User`
 ARG USER=cu
+
 # Set both user id and group id to 61000 to make sure it's out of range of 
 # existing uids in the host and there would be no overlaping. 
 ARG USER_ID=61000
 ARG GROUP_ID=61000
+
 # If set then the USER will be added to the sudoers group
-ARG ENABLE_SUDO
+ARG ENABLE_SUDO=1
 
 # Create a system account with specified UID and GID without root privilages. 
 # --no-log-init is to be used to avoid the known issue on the high value IDs.

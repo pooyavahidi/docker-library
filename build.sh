@@ -77,9 +77,6 @@ for image in "${images[@]}"; do
     base_image=${image_tag}
 done
 
-# clean up images
-docker image prune -f
-
 # Build the shell image 
 if [[ -n ${shell_image_tag} ]]; then
     docker build shell/${distro_like}/ -t ${shell_image_tag} \
