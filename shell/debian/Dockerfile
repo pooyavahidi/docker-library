@@ -3,15 +3,16 @@ FROM ${BASE_IMAGE}
 
 # Install prerequisites 
 RUN apt-get update \
-	&& apt-get install -y \
-		git \
-		rsync \
-		tmux \
-		tree \
-		unzip \
-		vim \
-		wget \
-		zsh
+    && apt-get install -y \
+        git \
+        rsync \
+        tmux \
+        tree \
+        unzip \
+        util-linux \
+        vim \
+        wget \
+        zsh
 
 # Internal username named `cu` short for `Container User`
 ARG USER=cu
@@ -28,9 +29,9 @@ ARG ENABLE_SUDO=1
 # --no-log-init is to be used to avoid the known issue on the high value IDs.
 # Also chown the required directories to be owned by this new internal users.
 RUN groupadd -g ${GROUP_ID} --system ${USER} \ 
-	&& useradd --no-log-init --system -u ${USER_ID} -g ${GROUP_ID} ${USER} \
-	&& mkdir /home/${USER} \
-	&& chown --recursive ${USER_ID}:${GROUP_ID} /home/${USER}
+    && useradd --no-log-init --system -u ${USER_ID} -g ${GROUP_ID} ${USER} \
+    && mkdir /home/${USER} \
+    && chown --recursive ${USER_ID}:${GROUP_ID} /home/${USER}
 
 # If ENABLE_SUDO is set to 1 then install sudo and add the USER to the sudoers
 RUN if [ "${ENABLE_SUDO}" = 1 ]; then \
@@ -47,13 +48,13 @@ WORKDIR "/home/${USER}"
 
 # Download and bootstrap the dotfiles
 RUN cd /tmp \
-	&& wget https://github.com/pooyavahidi/dotfiles/archive/refs/heads/master.zip \
-	&& unzip master.zip \
-	&& cd dotfiles-master \
-	&& ./bootstrap.sh \ 
-	&& cd /tmp \
-	&& rm -rf dotfiles-master \
-	&& rm master.zip
+    && wget https://github.com/pooyavahidi/dotfiles/archive/refs/heads/master.zip \
+    && unzip master.zip \
+    && cd dotfiles-master \
+    && ./bootstrap.sh \
+    && cd /tmp \
+    && rm -rf dotfiles-master \
+    && rm master.zip
 
 ENV SHELL="/bin/zsh"
 
