@@ -25,6 +25,12 @@ function print-usage {
 shell_image_tag=""
 current_user_shell_image_tag=""
 
+# if no input variable, show usage
+if [[ $# -eq 0 ]]; then
+    print-usage
+    exit 1
+fi
+
 # Load the command line parameters into variables
 while [ -n "$1" ]; do
     case $1 in
