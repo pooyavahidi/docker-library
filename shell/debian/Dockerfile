@@ -5,6 +5,7 @@ FROM ${BASE_IMAGE}
 RUN apt-get update \
     && apt-get install -y \
         git \
+        locales \
         rsync \
         tmux \
         tree \
@@ -18,14 +19,14 @@ RUN apt-get update \
 ARG USER=cu
 
 # Set both user id and group id to 61000 to make sure it's out of range of 
-# existing uids in the host and there would be no overlaping. 
+# existing uids in the host and there would be no overlapping.
 ARG USER_ID=61000
 ARG GROUP_ID=61000
 
 # If set then the USER will be added to the sudoers group
 ARG ENABLE_SUDO=1
 
-# Create a system account with specified UID and GID without root privilages. 
+# Create a system account with specified UID and GID without root privileges.
 # --no-log-init is to be used to avoid the known issue on the high value IDs.
 # Also chown the required directories to be owned by this new internal users.
 RUN groupadd -g ${GROUP_ID} --system ${USER} \ 
@@ -41,9 +42,13 @@ RUN if [ "${ENABLE_SUDO}" = 1 ]; then \
         && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers; \
     fi
 
-USER ${USER}
+# Generate locale files
+RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
+    locale-gen
 
-# Set the working dir to the user's home.
+
+# Change the user and set the working dir to the user's home.
+USER ${USER}
 WORKDIR "/home/${USER}"
 
 # Download and bootstrap the dotfiles
@@ -56,6 +61,11 @@ RUN cd /tmp \
     && rm -rf dotfiles-master \
     && rm master.zip
 
+# Set the environment variables
 ENV SHELL="/bin/zsh"
+# Set the locale to UTF-8
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US:en
+ENV LC_ALL=en_US.UTF-8
 
 CMD ["/bin/zsh"]
