@@ -1,4 +1,3 @@
-
 # Docker Library
 
 A collection of Dockerfiles for development, CI/CD pipelines and production. 
@@ -31,6 +30,19 @@ docker build shell/debian/ -t shell-local:ubuntu-latest \
 	--build-arg USER_ID=$(id -u ${USER}) \
 	--build-arg GROUP_ID=$(id -g ${USER})
 ```
+### Create a simple shell on top of an existing image
+The following builds the shell image on top of Ubuntu image.
+```
+docker build shell/debian -t pv/shell:latest \
+    --build-arg BASE_IMAGE=ubuntu:latest
+```
+Or it could be on top of any other (compatible) image.
+```sh
+docker build shell/debian -t pv/shell:latest \
+    --build-arg BASE_IMAGE=pv/dev:latest
+```
+> Shell and the base image must be compatible. As an example `shell/debian/Dockerfile` is compatible with any *debian-like* distros. So, it can be used on top of ubuntu, debian, etc.
+
 ## Build images locally using build.sh
 `build.sh` is a sample script for building images locally. These are a few examples.
 
