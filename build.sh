@@ -17,13 +17,18 @@ function print-usage {
     echo "-c | --current-user-shell <image_tag>     adds a shell image on top" \
 	     "of the final image using the current host's USER_ID as the" \
 		 "container's internal USER"
+    echo "-u | --user <container_user>              set the container's user. The default" \
+        "is 'cu'"
 	echo "Example:"
 	echo "build.sh -d debian -b ubuntu:20.04 -i python,nodejs -t pv/dev:latest" \
-         "-s shell:latest -c shell-local:latest"
+         "-s shell:latest -c shell-local:latest -u dev"
 }
 
+# Set the default values
 shell_image_tag=""
 current_user_shell_image_tag=""
+# Container's default user name
+ __user="cu"
 
 # if no input variable, show usage
 if [[ $# -eq 0 ]]; then
@@ -64,6 +69,10 @@ while [ -n "$1" ]; do
             shift
             current_user_shell_image_tag=$1
             ;;
+        -u | --user)
+            shift
+            __user=$1
+            ;;
         *)
             print-usage
             exit 1
@@ -86,13 +95,16 @@ done
 # Build the shell image 
 if [[ -n ${shell_image_tag} ]]; then
     docker build shell/${distro_like}/ -t ${shell_image_tag} \
-        --build-arg BASE_IMAGE=${image_tag}
+        --build-arg BASE_IMAGE=${image_tag} \
+        --build-arg USER=${__user}
+
 fi
 
 # Build the shell image from the using the current host's userid
 if [[ -n ${current_user_shell_image_tag} ]]; then
     docker build shell/${distro_like}/ -t ${current_user_shell_image_tag} \
         --build-arg BASE_IMAGE=${image_tag} \
+        --build-arg USER=${__user} \
         --build-arg USER_ID=$(id -u ${USER}) \
         --build-arg GROUP_ID=$(id -g ${USER})
 fi

@@ -55,11 +55,14 @@ build.sh can also create two additional shell images on top of the `pv/dev` imag
 
 ```sh
 docker pull ubuntu:20.04
-
+```
+The following creates an image based on `ubuntu:20.04` and then builds a series of tools on top of that. Finally it creates a shell image with a user called `dev`.
+```sh
 ./build.sh -d debian -b ubuntu:20.04 \
     -i python,nodejs,golang,awscli,aws_cdk \
     -t pv/dev:latest \
-    -s pv/shell:latest
+    -s pv/shell:latest \
+    -u dev
 ```
 
 Build including shell-local
@@ -78,7 +81,14 @@ Build including shell-local
     -i nodejs,golang,hugo \
     -t pv/hugo:latest
 ```
-
+### Build an awscli image
+```sh
+./build.sh -d debian -b ubuntu:20.04 \
+    -i awscli \
+    -t pv/awscli:latest \
+    -s pv/awscli-shell:latest \
+    -u dev
+```
 Prune the images to clean up
 ```sh
 docker image prune -f
