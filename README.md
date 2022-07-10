@@ -39,7 +39,8 @@ docker build shell/debian -t pv/shell:latest \
 Or it could be on top of any other (compatible) image.
 ```sh
 docker build shell/debian -t pv/shell:latest \
-    --build-arg BASE_IMAGE=pv/dev:latest
+    --build-arg BASE_IMAGE=pv/dev:latest \
+    --build-arg USER=dev
 ```
 > Shell and the base image must be compatible. As an example `shell/debian/Dockerfile` is compatible with any *debian-like* distros. So, it can be used on top of ubuntu, debian, etc.
 
