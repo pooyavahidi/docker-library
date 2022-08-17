@@ -47,6 +47,8 @@ docker build shell/debian -t pv/shell:latest \
 ## Build images locally using build.sh
 `build.sh` is a sample script for building images locally. These are a few examples.
 
+## Examples
+
 ### Build a shell for development
 First pull the official `ubuntu:22.04`, then build a dev image `pv/dev:latest` on top of that.
 
@@ -76,13 +78,13 @@ Build including shell-local
 ```
 > For MacOS and Windows, remove the `shell-local` option. Instead of creating `shell-local` just create a `shell` container and use Docker Desktop file sharing to share the host's directories.
 
-### Build a hugo image
+### Build hugo image
 ```sh
 ./build.sh -d debian -b ubuntu:22.04 \
-    -i nodejs,golang,hugo \
+    -i hugo \
     -t pv/hugo:latest
 ```
-### Build an awscli image
+### Build awscli image
 ```sh
 ./build.sh -d debian -b ubuntu:22.04 \
     -i awscli \
@@ -90,7 +92,16 @@ Build including shell-local
     -s pv/awscli-shell:latest \
     -u dev
 ```
+We can also add some additional layers to this image.
+```sh
+./build.sh -d debian -b ubuntu:22.04 \
+    -i awscli,python,docker \
+    -t pv/awscli:latest \
+    -s pv/awscli-shell:latest \
+    -u dev
+```
+### Clean up
 Prune the images to clean up
 ```sh
-docker image prune -f
+docker image prune
 ```

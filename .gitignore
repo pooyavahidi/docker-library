@@ -1,5 +1,8 @@
-# macOS finder 
-.DS_Store                                                                       
-                                                                               
-# vim swap files                                                                
+# macOS finder
+.DS_Store
+
+# vim swap files
 *.swp
+
+# zsh completion cache file
+.zcompdump

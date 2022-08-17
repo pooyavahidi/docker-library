@@ -1,9 +1,10 @@
 ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 
-# Install prerequisites 
+# Install prerequisites
 RUN apt-get update \
     && apt-get install -y \
+        curl \
         git \
         locales \
         rsync \
