@@ -64,7 +64,7 @@ The following creates an image based on `ubuntu:22.04` and then builds a series 
 ./build.sh -d debian -b ubuntu:22.04 \
     -i python,nodejs,golang,awscli,aws_cdk \
     -t pv/dev:latest \
-    -s pv/shell:latest \
+    -s pv/dev-shell:latest \
     -u dev
 ```
 
@@ -73,8 +73,8 @@ Build including shell-local
 ./build.sh -d debian -b ubuntu:22.04 \
     -i python,nodejs,golang,awscli \
     -t pv/dev:latest \
-    -s pv/shell:latest \
-    -c pv/shell-local:latest
+    -s pv/dev-shell:latest \
+    -c pv/dev-shell-local:latest
 ```
 > For MacOS and Windows, remove the `shell-local` option. Instead of creating `shell-local` just create a `shell` container and use Docker Desktop file sharing to share the host's directories.
 
