@@ -64,6 +64,8 @@ RUN cd /tmp \
 
 # Set the environment variables
 ENV SHELL="/bin/zsh"
+ENV USER=${USER}
+
 # Set the locale to UTF-8
 ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US:en
