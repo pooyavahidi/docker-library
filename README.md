@@ -22,7 +22,7 @@ In some cases where we want to develop in a container and mount the source code 
 The following builds a shell using the current host's user and group IDs.
 
 ```sh
-docker build shell/debian/ -t shell:ubuntu-latest \
+docker build shell/debian -t pv/ubuntu-shell \
     --build-arg BASE_IMAGE=ubuntu:latest \
     --build-arg USER_ID=$(id -u ${USER}) \
     --build-arg GROUP_ID=$(id -g ${USER})
@@ -30,8 +30,9 @@ docker build shell/debian/ -t shell:ubuntu-latest \
 ### Create a simple shell on top of an existing image
 The following builds the shell image on top of Ubuntu image.
 ```
-docker build shell/debian -t pv/shell \
+docker build shell/debian -t pv/ubuntu-shell \
     --build-arg BASE_IMAGE=ubuntu:latest
+    --build-arg USER=dev
 ```
 Or it could be on top of any other (compatible) image.
 ```sh
