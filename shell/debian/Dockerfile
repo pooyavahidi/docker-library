@@ -52,15 +52,8 @@ RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
 USER ${USER}
 WORKDIR "/home/${USER}"
 
-# Download and bootstrap the dotfiles
-RUN cd /tmp \
-    && wget https://github.com/pooyavahidi/dotfiles/archive/refs/heads/master.zip \
-    && unzip master.zip \
-    && cd dotfiles-master \
-    && ./bootstrap.sh \
-    && cd /tmp \
-    && rm -rf dotfiles-master \
-    && rm master.zip
+# Change the default shell to zsh
+SHELL ["/bin/zsh", "-c"]
 
 # Set the environment variables
 ENV SHELL="/bin/zsh"
@@ -70,5 +63,15 @@ ENV USER=${USER}
 ENV LANG=en_US.UTF-8
 ENV LANGUAGE=en_US:en
 ENV LC_ALL=en_US.UTF-8
+
+# Download and bootstrap the dotfiles
+RUN cd /tmp \
+    && wget https://github.com/pooyavahidi/dotfiles/archive/refs/heads/master.zip \
+    && unzip master.zip \
+    && cd dotfiles-master \
+    && source ./bootstrap.sh \
+    && cd /tmp \
+    && rm -rf dotfiles-master \
+    && rm master.zip
 
 CMD ["/bin/zsh"]
