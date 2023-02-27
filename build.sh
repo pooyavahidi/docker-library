@@ -108,3 +108,6 @@ if [[ -n ${current_user_shell_image_tag} ]]; then
         --build-arg USER_ID=$(id -u ${USER}) \
         --build-arg GROUP_ID=$(id -g ${USER})
 fi
+
+# Prune the dangling images
+docker image prune -f

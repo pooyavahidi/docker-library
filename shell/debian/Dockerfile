@@ -66,12 +66,10 @@ ENV LC_ALL=en_US.UTF-8
 
 # Download and bootstrap the dotfiles
 RUN cd /tmp \
-    && wget https://github.com/pooyavahidi/dotfiles/archive/refs/heads/master.zip \
-    && unzip master.zip \
-    && cd dotfiles-master \
+    && git clone --depth 1 https://github.com/pooyavahidi/dotfiles \
+    && cd dotfiles \
     && source ./bootstrap.sh \
     && cd /tmp \
-    && rm -rf dotfiles-master \
-    && rm master.zip
+    && rm -rf dotfiles
 
 CMD ["/bin/zsh"]

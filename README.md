@@ -72,16 +72,17 @@ Build the same using host's `USER_ID`. Use this method for creating **shell** co
 ./build.sh -d debian -b ubuntu:22.04 \
     -i python,nodejs,golang,awscli,aws_cdk \
     -t pv/dev \
-    -c pv/dev-shell \
+    -s pv/dev-shell \
     -u dev
 ```
-> For MacOS and Windows, don't use the `-c` option. Instead, create shell containers using the `-s` option. Then use Docker Desktop file sharing feature to share the host's directories with containers.
+> In Linux installations use `-c` option. For MacOS and Windows, use `-s` option instead which lets the docker user to use Docker Desktop file sharing feature to access the host's directories. `-c` option uses current user's USER_ID and GROUP_ID. `-s` uses 61000 (a high range ID) for both USER_ID and GROUP_ID.
 
 ### Build hugo image
 ```sh
 ./build.sh -d debian -b ubuntu:22.04 \
     -i hugo \
-    -t pv/hugo
+    -t pv/hugo \
+    -s pv/hugo-shell
 ```
 ### Build awscli image
 ```sh
