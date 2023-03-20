@@ -36,8 +36,9 @@ RUN groupadd -g ${GROUP_ID} --system ${USER} \
     && chown --recursive ${USER_ID}:${GROUP_ID} /home/${USER}
 
 # If ENABLE_SUDO is set to 1 then install sudo and add the USER to the sudoers
-RUN if [ "${ENABLE_SUDO}" = 1 ]; then \
-        apt-get install -y sudo \
+RUN if [ "${ENABLE_SUDO}" -eq 1 ]; then \
+        apt-get update \
+        && apt-get install -y sudo \
         && usermod -aG sudo ${USER} \
         # Members of sudoers group can use sudo without providing password
         && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers; \
