@@ -85,6 +85,7 @@ Build the same using host's `USER_ID`. Use this method for creating **shell** co
     -s pv/hugo-shell
 ```
 ### Build awscli image
+The following builds awscli image.
 ```sh
 ./build.sh -d debian -b ubuntu:22.04 \
     -i awscli \
@@ -92,13 +93,35 @@ Build the same using host's `USER_ID`. Use this method for creating **shell** co
     -s pv/awscli-shell \
     -u dev
 ```
-We can also add some additional layers to this image.
+The above command produces two images `pv/awscli` and `pv/awscli-shell`. In order to build only one image which includes the shell, we set both `-t` and `-s` to the same value.
+```sh
+./build.sh -d debian -b ubuntu:22.04 \
+    -i awscli \
+    -t pv/awscli \
+    -s pv/awscli \
+    -u dev
+```
+Add some additional layers to this image.
 ```sh
 ./build.sh -d debian -b ubuntu:22.04 \
     -i awscli,python,docker \
     -t pv/awscli \
     -s pv/awscli-shell \
     -u dev
+```
+Add an additional layer to the previousely built image.
+```sh
+./build.sh -b pv/awscli \
+    -i golang \
+    -t pv/awscli-go\
+    -s pv/awscli-go-shell \
+```
+Build just a shell on top of an existing image.
+```sh
+# On top of a locally built image.
+./build.sh -b pv/dev -s pv/dev-shell
+# Or on top of the official Ubuntu image
+./build.sh -b ubuntu -s pv/ubuntu-shell
 ```
 ### Clean up
 Prune the images to clean up

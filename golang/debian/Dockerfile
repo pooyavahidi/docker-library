@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=debian:latest
+ARG BASE_IMAGE=ubuntu:latest
 FROM ${BASE_IMAGE}
 
 RUN apt-get update \
@@ -7,19 +7,23 @@ RUN apt-get update \
         gnupg \
         wget
 
+# Using official source at:
+# https://github.com/docker-library/golang/blob/master/1.20/bullseye/Dockerfile
+
 ENV PATH /usr/local/go/bin:$PATH
-ENV GOLANG_VERSION 1.19.1
+
+ENV GOLANG_VERSION 1.20.2
 
 RUN set -eux; \
         dpkgArch=$(dpkg --print-architecture); \
         case "${dpkgArch##-}" in \
             "amd64") \
                 url="https://dl.google.com/go/go${GOLANG_VERSION}.linux-amd64.tar.gz"; \
-                sha256="acc512fbab4f716a8f97a8b3fbaa9ddd39606a28be6c2515ef7c6c6311acffde"; \
+                sha256="4eaea32f59cde4dc635fbc42161031d13e1c780b87097f4b4234cfce671f1768"; \
                 ;; \
             "arm64") \
                 url="https://dl.google.com/go/go${GOLANG_VERSION}.linux-arm64.tar.gz"; \
-                sha256="49960821948b9c6b14041430890eccee58c76b52e2dbaafce971c3c38d43df9f"; \
+                sha256="78d632915bb75e9a6356a47a42625fd1a785c83a64a643fedd8f61e31b1b3bef"; \
                 ;; \
             *) echo "error: unsupported architecture ${dpkgArch}"; exit 1 ;; \
         esac; \

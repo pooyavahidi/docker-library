@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=debian:latest
+ARG BASE_IMAGE=ubuntu:latest
 FROM ${BASE_IMAGE}
 
 # Install required packaged for python development 

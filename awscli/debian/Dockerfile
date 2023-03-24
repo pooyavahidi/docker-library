@@ -1,5 +1,5 @@
 ARG BASE_IMAGE
-FROM debian:latest as builder
+FROM ubuntu:latest as builder
 
 RUN set -eux \
 	&& apt-get update \
