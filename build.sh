@@ -165,7 +165,7 @@ function build_default_images() {
         build_image \
             -i hugo \
             -t ${DOCKER_LOCAL_REGISTRY}/hugo \
-            -s ${DOCKER_LOCAL_REGISTRY}/hugo-shell
+            -s ${DOCKER_LOCAL_REGISTRY}/hugo
     fi
 }
 
@@ -181,3 +181,4 @@ function main() {
 }
 
 main "${@}"
+
