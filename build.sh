@@ -10,7 +10,10 @@ function print_usage {
     echo -e "-s | --shell-image-tag <shell-image_tag>"
     echo -e "-c | --current-user"
     echo -e "-u | --username <container_user>"
-    echo -e "--defaults builds a few pre defined images"
+    echo -e "\nTo build default images use --defaults option"
+    echo -e "\nDefault images: dev,awscli,anaconda,hugo\n"
+    echo -e "./build --defaults"
+    echo -e "./build --defaults -e|--exclude image1,image2"
 }
 
 function build_image() {
@@ -107,26 +110,63 @@ function build_image() {
 }
 
 function build_default_images() {
-    local __image_prefix
+    local __excludes
 
-    __image_prefix="pv/"
+    # Load the command line parameters into variables
+    while [ -n "$1" ]; do
+        case $1 in
+            -e | --exclude)
+                shift
+                [[ -z "${__excludes:=$1}" ]] \
+                    && echo "Excluding images must be provided." && exit 1
+                ;;
+            --defaults)
+                ;;
+            *)
+                echo "Not supported option for default builds" >&2
+                exit 1
+                ;;
+        esac
+        (( $# > 0 )) && shift
+    done
 
-    # Build dev image for general development purposes.
-    build_image \
-        -d debian \
-        -i python,nodejs,golang,awscli,aws_cdk,docker \
-        -t ${__image_prefix}dev \
-        -s ${__image_prefix}dev-shell \
-        -u dev
 
-    # Build awscli image for awscli and boto programming.
-    build_image \
-        -d debian \
-        -i awscli \
-        -t ${__image_prefix}awscli \
-        -s ${__image_prefix}awscli \
-        -u dev
+    # Build dev and dev-shell. This image is for general development. So it
+    # uses most of the layers.
+    if [[ ! "${__excludes}" =~ "dev" ]]; then
+        echo Building dev and dev-shell images...
+        build_image \
+            -i python,nodejs,golang,awscli,aws_cdk,docker \
+            -t ${DOCKER_LOCAL_REGISTRY}/dev \
+            -s ${DOCKER_LOCAL_REGISTRY}/dev-shell
+    fi
 
+    # awscli
+    if [[ ! "${__excludes}" =~ "awscli" ]]; then
+        echo Building awscli image...
+        build_image \
+            -i awscli \
+            -t ${DOCKER_LOCAL_REGISTRY}/awscli \
+            -s ${DOCKER_LOCAL_REGISTRY}/awscli
+    fi
+
+    # Anaconda
+    if [[ ! "${__excludes}" =~ "anaconda" ]]; then
+        echo Building anaconda image...
+        build_image \
+            -i anaconda \
+            -t ${DOCKER_LOCAL_REGISTRY}/anaconda \
+            -s ${DOCKER_LOCAL_REGISTRY}/anaconda
+    fi
+
+    # hugo and hugo-shell
+    if [[ ! "${__excludes}" =~ "hugo" ]]; then
+        echo Building hugo and hugo-shell images...
+        build_image \
+            -i hugo \
+            -t ${DOCKER_LOCAL_REGISTRY}/hugo \
+            -s ${DOCKER_LOCAL_REGISTRY}/hugo-shell
+    fi
 }
 
 function main() {
@@ -134,13 +174,7 @@ function main() {
     (( $# == 0 )) && print_usage && exit 1
 
     if [[ "${@}" =~ "--defaults" ]]; then
-        # If --defaults is the only option is provided, then build defaults.
-        if [[ "${@}" != "--defaults" ]]; then
-            echo "Option --default cannot be used with other options"
-            exit 1
-        else
-            build_default_images "${@}"
-        fi
+        build_default_images "${@}"
     else
         build_image "${@}"
     fi

@@ -1,22 +1,23 @@
 ARG BASE_IMAGE=ubuntu:latest
 FROM ${BASE_IMAGE}
 
+# Based on official source at:
+# https://github.com/docker-library/golang/blob/master/1.20/bullseye/Dockerfile
+
 RUN apt-get update \
-    && apt-get install -y \
+    && apt-get install -y --no-install-recommends \
         dirmngr \
         gnupg \
-        wget
-
-# Using official source at:
-# https://github.com/docker-library/golang/blob/master/1.20/bullseye/Dockerfile
+        wget \
+    && rm -rf /var/lib/apt/lists/*
 
 ENV PATH /usr/local/go/bin:$PATH
 
 ENV GOLANG_VERSION 1.20.2
 
 RUN set -eux; \
-        dpkgArch=$(dpkg --print-architecture); \
-        case "${dpkgArch##-}" in \
+        dpkgArch="$(dpkg --print-architecture)"; \
+        case "${dpkgArch##*-}" in \
             "amd64") \
                 url="https://dl.google.com/go/go${GOLANG_VERSION}.linux-amd64.tar.gz"; \
                 sha256="4eaea32f59cde4dc635fbc42161031d13e1c780b87097f4b4234cfce671f1768"; \
@@ -25,7 +26,7 @@ RUN set -eux; \
                 url="https://dl.google.com/go/go${GOLANG_VERSION}.linux-arm64.tar.gz"; \
                 sha256="78d632915bb75e9a6356a47a42625fd1a785c83a64a643fedd8f61e31b1b3bef"; \
                 ;; \
-            *) echo "error: unsupported architecture ${dpkgArch}"; exit 1 ;; \
+            *) echo "error: unsupported architecture ${dpkgArch}" >&2; exit 1 ;; \
         esac; \
         wget -O go.tgz.asc "${url}.asc" --progress=dot:giga; \
         wget -O go.tgz "${url}" --progress=dot:giga; \

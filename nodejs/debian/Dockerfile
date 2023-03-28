@@ -1,27 +1,28 @@
 ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 
-# Install prerequisites
+# Install nodejs LTS using its official source at:
+# https://github.com/nodejs/docker-node/tree/main/19/bullseye/Dockerfile
+
 RUN apt-get update \
     && apt-get install -y \
         curl \
+        dirmngr \
         gpg \
-        xz-utils
-
-# Install nodejs LTS using its official source at:
-# https://github.com/nodejs/docker-node/tree/main/19/bullseye/Dockerfile
+        xz-utils \
+    && rm -rf /var/lib/apt/lists/*
 
 ENV NODE_VERSION 19.8.1
 
 RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" \
     && case "${dpkgArch##*-}" in \
-      amd64) ARCH='x64';; \
-      ppc64el) ARCH='ppc64le';; \
-      s390x) ARCH='s390x';; \
-      arm64) ARCH='arm64';; \
-      armhf) ARCH='armv7l';; \
-      i386) ARCH='x86';; \
-      *) echo "unsupported architecture"; exit 1 ;; \
+      "amd64") ARCH='x64';; \
+      "ppc64el") ARCH='ppc64le';; \
+      "s390x") ARCH='s390x';; \
+      "arm64") ARCH='arm64';; \
+      "armhf") ARCH='armv7l';; \
+      "i386") ARCH='x86';; \
+      *) echo "unsupported architecture ${dpkgArch}" >&2; exit 1 ;; \
     esac \
     # gpg keys listed at https://github.com/nodejs/node#release-keys
     && set -ex \

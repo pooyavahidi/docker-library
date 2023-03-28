@@ -8,6 +8,7 @@ RUN set -eux \
 		gnupg \
 		unzip \
 		wget
+
 WORKDIR /tmp 
 # Install AWS CLI v2
 # https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-linux.html
