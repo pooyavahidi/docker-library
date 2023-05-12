@@ -1,35 +1,20 @@
 #!/bin/bash
 
-function print_usage {
-	echo "Usage: [option] value"
-    echo -e "-h | --help"
-    echo -e "-d | --distro-like <debian|alpine>"
-    echo -e "-b | --base-image <base-image>"
-    echo -e "-i | --images <list>"
-    echo -e "-t | --image-tag <image_tag>"
-    echo -e "-s | --shell-image-tag <shell-image_tag>"
-    echo -e "-c | --current-user"
-    echo -e "-u | --username <container_user>"
-    echo -e "\nTo build default images use --defaults option"
-    echo -e "\nDefault images: dev,awscli,anaconda,hugo\n"
-    echo -e "./build --defaults"
-    echo -e "./build --defaults -e|--exclude image1,image2"
-}
 
 function build_image() {
-    # Set the default values
-    local __shell_image_tag
     local __use_current_user
-    local -a __images
+    local -a __layers
+    local __layer
+    local __image_name
+    local -a __image_tags
+    local __image_tag
     local __base_image
     local __distro_like
-    local __shell_image_tag
     local __user
-    local __recipe
     local __user_id_args
 
     # Load the command line parameters into variables
-    while [ -n "$1" ]; do
+    while (( $# )); do
         case $1 in
             -d | --distro-like)
                 shift
@@ -39,33 +24,33 @@ function build_image() {
                 shift
                 __base_image=$1
                 ;;
-            -i | --images)
+            -l | --layers)
                 shift
-                [[ -z $1 ]] && echo "Missing images parameter" && print-usage
-                __images=($(echo $1 | sed 's/ //g' | sed 's/,/ /g'))
+                [[ -z $1 ]] && echo "Image layers not provided" >&2 && exit 1
+                IFS=',' read -ra __layers <<< "$1"
                 ;;
-            -t | --image-tag)
+            -n | --image-name)
                 shift
-                __image_tag=$1
+                __image_name=$1
                 ;;
-            -s | --shell-image-tag)
+            -t | --image-tags)
                 shift
-                __shell_image_tag=$1
+                [[ -z $1 ]] && echo "Image tags must be provided." >&2 && exit 1
+                IFS=',' read -ra __image_tags <<< "$1"
                 ;;
             -c | --current-user)
-                shift
                 __use_current_user=1
                 ;;
             -u | --username)
                 shift
                 __user=$1
                 ;;
-             *)
-                print_usage
+            *)
+                echo "$1 is not a supported option" >&2
                 exit 1
                 ;;
         esac
-        (( $# > 0 )) && shift
+        shift
     done
 
     # Set the variables and defaults.
@@ -73,37 +58,45 @@ function build_image() {
     [[ -z $__distro_like ]] &&  __distro_like="debian"
     [[ -z $__use_current_user ]] &&  __use_current_user=0
     [[ -z $__user ]] && __user="dev"
-    #[[ -z $__image_tag ]] && echo "image tag is not provided" && exit 1
+    [[ -z $__image_name ]] && echo "Image name is not provided" >&2 && exit 1
+    [[ -z $__layers ]] && echo "layers are not provided" >&2 && exit 1
+    [[ -z $__image_tags ]] && __image_tags=("latest")
 
+    # If current_user flag is set, then set the USER_ID and GROUP_ID to
+    # the host's current user id.
+    if (( current_user == 1 )); then
+        __user_id_args="--build-arg USER_ID=$(id -u ${USER}) \
+                        --build-arg GROUP_ID=$(id -g ${USER})"
+    fi
 
-    # Build images ordered based on the images array.
-    # Each image is the base for the next one.
-    for __image in "${__images[@]}"; do
-        docker build ${__image}/${__distro_like}/ -t ${__image_tag} \
-            --build-arg BASE_IMAGE=${__base_image}
-
-
-        (( $? != 0 )) && exit 1
-
-        __base_image=${__image_tag}
-    done
-
-
-    # If shell_image_tag is provided, then build the shell image.
-    if [[ -n $__shell_image_tag ]]; then
-
-        # If Build the shell image from the using the current host's userid
-        if (( current_user == 1 )); then
-            __user_id_args="--build-arg USER_ID=$(id -u ${USER}) \
-                            --build-arg GROUP_ID=$(id -g ${USER})"
-        fi
-
-        docker build shell/${__distro_like}/ -t ${__shell_image_tag} \
+    # Build images ordered based on the stack array. Each image is the base
+    # for the next one.
+    for __layer in "${__layers[@]}"; do
+        docker build ${__layer}/${__distro_like}/ \
+            -t ${__registry}/${__image_name}:temp \
             --build-arg BASE_IMAGE=${__base_image} \
             --build-arg USER=${__user} ${__user_id_args}
 
-        (( $? != 0 )) && exit 1
-    fi
+        if (( $? != 0 )); then
+            exit 1
+        fi
+
+        __base_image="${__registry}/${__image_name}:temp"
+    done
+
+    # Create tags
+    for __image_tag in "${__image_tags[@]}"; do
+        docker tag ${__registry}/${__image_name}:temp \
+            ${__registry}/${__image_name}:${__image_tag}
+
+        if (( $? != 0 )); then
+            exit 1
+        fi
+        echo "tag ${__registry}/${__image_name}:${__image_tag}"
+
+    done
+    # Remove the temp tag
+    docker image rm ${__registry}/${__image_name}:temp
 
     # Prune the dangling images
     docker image prune -f
@@ -111,72 +104,94 @@ function build_image() {
 
 function build_default_images() {
     local __excludes
+    local -a __default_images
+    local __image
+    local __image_name
+    local __image_layers
+    local __image_tags
+    local __image_values
 
     # Load the command line parameters into variables
-    while [ -n "$1" ]; do
+    while (( $# )); do
         case $1 in
             -e | --exclude)
                 shift
                 [[ -z "${__excludes:=$1}" ]] \
-                    && echo "Excluding images must be provided." && exit 1
+                    && echo "Excluding images must be provided." >&2 && exit 1
+                ;;
+            --registry)
+                shift
                 ;;
             --defaults)
                 ;;
             *)
-                echo "Not supported option for default builds" >&2
+                echo "$1 is not a supported option" >&2
                 exit 1
                 ;;
         esac
-        (( $# > 0 )) && shift
+        shift
     done
+    # default images info in the following format:
+    # image_name|comma separated list of layers
+    __default_images=(
+        "development|base,python,nodejs,golang,awscli,aws_cdk,docker,shell"
+        "awscli|awscli,shell"
+        "anaconda|anaconda,shell"
+        "datascience|anaconda,datascience,shell"
+        "hugo|hugo,shell"
 
+    )
+    for __image in "${__default_images[@]}"; do
 
-    # Build dev and dev-shell. This image is for general development. So it
-    # uses most of the layers.
-    if [[ ! "${__excludes}" =~ "dev" ]]; then
-        echo Building dev and dev-shell images...
-        build_image \
-            -i python,nodejs,golang,awscli,aws_cdk,docker \
-            -t ${DOCKER_LOCAL_REGISTRY}/dev \
-            -s ${DOCKER_LOCAL_REGISTRY}/dev-shell
-    fi
+        IFS='|' read -ra __image_values <<< "$__image"
+        __image_name=${__image_values[0]}
+        __image_layers=${__image_values[1]}
 
-    # awscli
-    if [[ ! "${__excludes}" =~ "awscli" ]]; then
-        echo Building awscli image...
-        build_image \
-            -i awscli \
-            -t ${DOCKER_LOCAL_REGISTRY}/awscli \
-            -s ${DOCKER_LOCAL_REGISTRY}/awscli
-    fi
-
-    # Anaconda
-    if [[ ! "${__excludes}" =~ "anaconda" ]]; then
-        echo Building anaconda image...
-        build_image \
-            -i anaconda \
-            -t ${DOCKER_LOCAL_REGISTRY}/anaconda \
-            -s ${DOCKER_LOCAL_REGISTRY}/anaconda
-    fi
-
-    # hugo and hugo-shell
-    if [[ ! "${__excludes}" =~ "hugo" ]]; then
-        echo Building hugo and hugo-shell images...
-        build_image \
-            -i hugo \
-            -t ${DOCKER_LOCAL_REGISTRY}/hugo \
-            -s ${DOCKER_LOCAL_REGISTRY}/hugo
-    fi
+        if [[ ! "${__excludes}" =~ "$__image_name" ]]; then
+            echo Building $__image_name image...
+            build_image \
+                -l ${__image_layers} \
+                -n ${__image_name} ${__platform_cmd}
+        fi
+    done
 }
 
-function main() {
-    # if no input variable, show usage
-    (( $# == 0 )) && print_usage && exit 1
 
-    if [[ "${@}" =~ "--defaults" ]]; then
-        build_default_images "${@}"
+function main() {
+    local __defaults
+
+    # If no parameter is provided exit with error.
+    (( $# == 0 )) && echo "Parameters must be provided." >&2 && exit 1
+
+    original_params="${@}"
+
+    # Load the command line parameters into variables
+    while (( $# )); do
+        case $1 in
+            --registry)
+                shift
+                __registry=$1
+                ;;
+            --defaults)
+                __defaults="1"
+                ;;
+        esac
+        shift
+    done
+    # If __registry is empty, set it to $DOCKER_LOCAL_REGISTRY or,
+    # if that is also empty, to $DOCKERHUB_USERNAME
+    : "${__registry:=${DOCKER_LOCAL_REGISTRY:-$DOCKERHUB_USERNAME}}"
+
+    if [[ -z $__registry ]]; then
+        echo "Registry must be provided." >&2
+        exit 1
+    fi
+
+
+    if [[ -n $__defaults ]]; then
+        build_default_images ${original_params[@]}
     else
-        build_image "${@}"
+        build_image ${original_params[@]}
     fi
 }
 
