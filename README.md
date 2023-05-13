@@ -1,25 +1,43 @@
 # Docker Library
 
-A collection of Dockerfiles for development, CI/CD pipelines and production. 
+A collection of Dockerfiles specifically curated for development purposes.
 
-## Dockerfiles
-The base image in Dockerfiles are parameterized. So, they can be built based on any compatible distro images (e.g. debian, alpine, ...). 
+The base images in these Dockerfiles are parameterized, allowing them to be built on top of any compatible distro images such as Debian, Alpine, and others.
 
-The idea is to provide the ability to build images on top of each other based on the requirements.
-For example, we can build an image based on latest ubuntu for developing golang and python using the following:
+The overarching concept is to facilitate the creation of images that can be stacked atop each other, depending on specific requirements. For instance, one could build an image premised on the latest Ubuntu version, customized for developing in Golang and Python. This process allows for greater flexibility and customization in the development environment.
 
 ```sh
 docker build golang/debian/ -t my_dev_container --build-arg BASE_IMAGE=ubuntu:latest
+
+# Then use the newly built image as the base image of the next one.
 docker build python/debian/ -t my_dev_container --build-arg BASE_IMAGE=my_dev_container
 ```
 
-## Shell images
-These images are intended for local development and tests. They create a user within the container which uses a high range id of 61000 (to not overlap with any potential host user IDs.)
+## Shell Images
 
-### Create a shell image with host's current user id
-In some cases where we want to develop in a container and mount the source code directory from the host as a volume, we need to give a write permission to the container's user id. When using Docker Desktop, this is normally handled by the Docker Desktop. However, when using docker engine in an OS such as linux, we need to manage this ourselves. To fix this, we can simply create a container user using the same `USER_ID` and `GROUP_ID` of the host's current user.
+These images are designed for local development and testing. They incorporate a user within the container that utilizes a high-range id of 61000. This is done to avoid any potential overlap with host user IDs.
 
-The following builds a shell using the current host's user and group IDs.
+### Creating a simple shell on top of an existing image
+The following command builds a shell image on top of the Ubuntu image. It also set the username of the container user as `dev`.
+```sh
+docker build shell/debian -t your_registry/ubuntu-shell \
+    --build-arg BASE_IMAGE=ubuntu:latest \
+    --build-arg USER=dev
+```
+Or it could be built on top of any other compatible(same distro, e.g. debian) image.
+```sh
+docker build shell/debian -t your_registry/shell \
+    --build-arg BASE_IMAGE=your_registry/dev:latest \
+    --build-arg USER=dev
+```
+>It's crucial to note that the shell and the base image should be compatible. For instance, the Dockerfile located at `shell/debian/Dockerfile` is compatible with any *debian-like* distributions. Therefore, it can be readily used on top of other systems such as Ubuntu, Debian, and so forth. This compatibility allows for seamless integration and efficient usage of resources, enhancing your overall development experience.
+
+### Constructing a Shell Image with the Host's Current User ID in Linux
+Using Linux docker engine where development within a container is preferred and the host's source code directory needs to be mounted as a volume, write permission must be granted to the container's user id. This permission management is usually handled by Docker Desktop in MacOS and Windows. However, when working with a Docker engine in an operating system such as Linux, this task falls upon the user.
+
+A solution to this is to create a container user that shares the same `USER_ID` and `GROUP_ID` as the host's current user. This can effectively manage permissions and ensure seamless operation.
+
+Building a shell using the host's current user and group IDs:
 
 ```sh
 docker build shell/debian -t pv/ubuntu-shell \
@@ -27,104 +45,40 @@ docker build shell/debian -t pv/ubuntu-shell \
     --build-arg USER_ID=$(id -u ${USER}) \
     --build-arg GROUP_ID=$(id -g ${USER})
 ```
-### Create a simple shell on top of an existing image
-The following builds the shell image on top of Ubuntu image.
-```
-docker build shell/debian -t pv/ubuntu-shell \
-    --build-arg BASE_IMAGE=ubuntu:latest
-    --build-arg USER=dev
-```
-Or it could be on top of any other (compatible) image.
-```sh
-docker build shell/debian -t pv/shell \
-    --build-arg BASE_IMAGE=pv/dev:latest \
-    --build-arg USER=dev
-```
-> Shell and the base image must be compatible. As an example `shell/debian/Dockerfile` is compatible with any *debian-like* distros. So, it can be used on top of ubuntu, debian, etc.
+## Crafting Images with build.sh
+The `build.sh` script is a versatile tool that you can use to craft images either on your local machine or within a cicd pipeline. Here are some examples to get you started, along with a few predefined images and their layers which can be quickly implemented.
 
-## Build images locally using build.sh
-`build.sh` is a sample script for building images locally. These are a few examples.
+### Crafting a Development Image
+Beyond its basic functionalities, `build.sh` offers the capability to create two additional shell images on top of the `pv/dev` image. By using the `-s` option, you can add a shell layer to `pv/dev` that incorporates a container's user. Meanwhile, the `-c` option allows you to construct a shell layer with a container's user that shares the same `USER_ID` and `GROUP_ID` as the host's current user.
 
-## Examples
+> Note: The order of the layers is crucial. Layers that depend on others should be arranged accordingly. For instance, the sequence could be ...golang,hugo,... .
 
-### Build a shell for development
-First pull the official `ubuntu:22.04`, then build a dev image `pv/dev:latest` on top of that.
-
-build.sh can also create two additional shell images on top of the `pv/dev` image. Using option `-s` it creates a shell layer on top of the `pv/dev` with a container's user. Using the `-c` option, it creates a shell layer with a container's user with the same `USER_ID` and `GROUP_ID` as the current host's user.
-
-> Note: Order of the layers is important. So, the ones which depend on the others should come after. E.g. ...golang,hugo,... .
+To illustrate, let's create an image named `my-image` based on `ubuntu:latest`. This image will then have a series of layers built on top of it. Finally, a shell image with a user named `dev` will be constructed. Here's how you can achieve this:
 
 ```sh
-docker pull ubuntu:22.04
-```
-The following creates an image based on `ubuntu:22.04` and then builds a series of tools on top of that. Finally it creates a shell image with a user called `dev`.
-```sh
-./build.sh -d debian -b ubuntu:22.04 \
-    -i python,nodejs,golang,awscli,aws_cdk \
-    -t pv/dev \
-    -s pv/dev-shell \
+./build.sh -d debian -b ubuntu:latest \
+    -i python,nodejs,golang,awscli,aws_cdk,shell \
+    -t my-registry/my-image:latest \
     -u dev
 ```
 
-Build the same using host's `USER_ID`. Use this method for creating **shell** containers in linux hosts.
+> On a Linux docker engine, use the `-c | --current-user` option to generate a container user with the same USER ID as the host's user. The `-c` option adopts the current user's USER_ID and GROUP_ID, while `-s` applies 61000 (a high range ID) for both USER_ID and GROUP_ID. MacOS and Windows users need not worry about this as Docker Desktop manages access to the host's file system.
+
+### Crafting a Development Image Using the Recipe
+Another option is to use predefined recipes for faster image crafting. Here's an example:
 
 ```sh
-./build.sh -d debian -b ubuntu:22.04 \
-    -i python,nodejs,golang,awscli,aws_cdk \
-    -t pv/dev \
-    -s pv/dev-shell \
-    -u dev
+./build.sh -r development
 ```
-> In Linux installations use `-c` option. For MacOS and Windows, use `-s` option instead which lets the docker user to use Docker Desktop file sharing feature to access the host's directories. `-c` option uses current user's USER_ID and GROUP_ID. `-s` uses 61000 (a high range ID) for both USER_ID and GROUP_ID.
+By default, the image name will be the same as the recipe name, which is `development` in this case. The layers are defined in the recipe, and the default user and initial base image are set to `dev` and `ubuntu:22.04`, respectively.
 
-### Build hugo image
+### Crafting a Development Image for Multiple Platforms with Buildx
+If you're targeting multiple platforms for your image, you'll need to use the `--platform` option along with a list of the desired platforms. Here's how you can do this:
+
 ```sh
-./build.sh -d debian -b ubuntu:22.04 \
-    -i hugo \
-    -t pv/hugo \
-    -s pv/hugo-shell
+./build.sh -r development \
+    --platform linux/amd64,linux/arm64 \
+    --registry $DOCKERHUB_USERNAME \
+    --push
 ```
-### Build awscli image
-The following builds awscli image.
-```sh
-./build.sh -d debian -b ubuntu:22.04 \
-    -i awscli \
-    -t pv/awscli \
-    -s pv/awscli-shell \
-    -u dev
-```
-The above command produces two images `pv/awscli` and `pv/awscli-shell`. In order to build only one image which includes the shell, we set both `-t` and `-s` to the same value.
-```sh
-./build.sh -d debian -b ubuntu:22.04 \
-    -i awscli \
-    -t pv/awscli \
-    -s pv/awscli \
-    -u dev
-```
-Add some additional layers to this image.
-```sh
-./build.sh -d debian -b ubuntu:22.04 \
-    -i awscli,python,docker \
-    -t pv/awscli \
-    -s pv/awscli-shell \
-    -u dev
-```
-Add an additional layer to the previousely built image.
-```sh
-./build.sh -b pv/awscli \
-    -i golang \
-    -t pv/awscli-go\
-    -s pv/awscli-go-shell \
-```
-Build just a shell on top of an existing image.
-```sh
-# On top of a locally built image.
-./build.sh -b pv/dev -s pv/dev-shell
-# Or on top of the official Ubuntu image
-./build.sh -b ubuntu -s pv/ubuntu-shell
-```
-### Clean up
-Prune the images to clean up
-```sh
-docker image prune
-```
+The command builds the `development` recipe for both `amd64` and `arm64` architectures. Once the image is built, it will be pushed to the Docker Hub repository.
