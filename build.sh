@@ -76,7 +76,7 @@ function main() {
                 shift
                 __registry=$1
                 ;;
-            -r | recipe)
+            -r | --recipe)
                 shift
                 __recipe=$1
                 ;;
@@ -112,8 +112,8 @@ function main() {
                 break
             fi
         done
-        [[ -z $__layers ]] \\
-            && echo "$__recipe not found or its layers are not defined" >&2 \\
+        [[ -z $__layers ]] \
+            && echo "$__recipe not found or its layers are not defined" >&2 \
             && exit 1
     fi
     [[ -z $__layers ]] && echo "layers are not provided" >&2 && exit 1
