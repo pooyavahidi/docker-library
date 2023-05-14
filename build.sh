@@ -3,14 +3,16 @@
 __default_base_image="ubuntu:22.04"
 
 # default images info in the following format:
-# recipe_name|layers_in_order
-__recipes=(
-    "development|base,python,nodejs,golang,awscli,aws_cdk,docker,shell"
-    "awscli|awscli,shell"
-    "anaconda|anaconda,shell"
-    "datascience|anaconda,datascience,shell"
-    "hugo|hugo,shell"
-)
+# recipe_name|layers_in_order|base_image(optional)
+function load_recipes(){
+    __recipes=(
+        "development|base,python,nodejs,golang,awscli,aws_cdk,docker,shell"
+        "awscli|awscli,shell"
+        "anaconda|anaconda,shell"
+        "datascience|datascience,shell|$__registry/anaconda"
+        "hugo|hugo,shell"
+    )
+}
 
 function main() {
     local __use_current_user
@@ -28,6 +30,7 @@ function main() {
     local __recipe
     local __recipe_info
     local __recipe_name
+    local __recipe_base
     local __registry
 
     # If no parameter is provided exit with error.
@@ -101,14 +104,25 @@ function main() {
     : "${__registry:=${DOCKER_LOCAL_REGISTRY:-$DOCKERHUB_USERNAME}}"
     [[ -z $__registry ]] && echo "Registry must be provided." >&2 && exit 1
 
-    # Validate layers
-    # If recipe is provided, set the layers from there.
+
+    # Load recipes after setting up the registry variable
+    load_recipes
+
+    # If recipe is provided, set the parameters from there.
     if [[ -n $__recipe ]]; then
         __layers=""
         for __recipe_info in "${__recipes[@]}"; do
+
             __recipe_name=$(echo $__recipe_info | cut -d'|' -f1)
+
             if [[ "$__recipe" == "$__recipe_name" ]]; then
                 __layers="$(echo $__recipe_info | cut -d'|' -f2)"
+                __recipe_base="$(echo $__recipe_info | cut -d'|' -f3)"
+
+                if [[ -n $__recipe_base ]]; then
+                    __base_image=$__recipe_base
+                fi
+
                 break
             fi
         done
@@ -116,6 +130,8 @@ function main() {
             && echo "$__recipe not found or its layers are not defined" >&2 \
             && exit 1
     fi
+
+    # Validate layers
     [[ -z $__layers ]] && echo "layers are not provided" >&2 && exit 1
     IFS=',' read -ra __layers <<< "$__layers"
 
