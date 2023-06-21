@@ -17,7 +17,7 @@ docker build python/debian/ -t my_dev_container --build-arg BASE_IMAGE=my_dev_co
 
 These images are designed for local development and testing. They incorporate a user within the container that utilizes a high-range id of 61000. This is done to avoid any potential overlap with host user IDs.
 
-### Creating a simple shell on top of an existing image
+### Building a simple shell on top of an existing image
 The following command builds a shell image on top of the Ubuntu image. It also set the username of the container user as `dev`.
 ```sh
 docker build shell/debian -t your_registry/ubuntu-shell \
@@ -45,10 +45,10 @@ docker build shell/debian -t pv/ubuntu-shell \
     --build-arg USER_ID=$(id -u ${USER}) \
     --build-arg GROUP_ID=$(id -g ${USER})
 ```
-## Crafting Images with build.sh
+## Building Images with build.sh
 The `build.sh` script is a versatile tool that you can use to craft images either on your local machine or within a cicd pipeline. Here are some examples to get you started, along with a few predefined images and their layers which can be quickly implemented.
 
-### Crafting a Development Image
+### Example: Development Image
 Beyond its basic functionalities, `build.sh` offers the capability to create two additional shell images on top of the `pv/dev` image. By using the `-s` option, you can add a shell layer to `pv/dev` that incorporates a container's user. Meanwhile, the `-c` option allows you to construct a shell layer with a container's user that shares the same `USER_ID` and `GROUP_ID` as the host's current user.
 
 > Note: The order of the layers is crucial. Layers that depend on others should be arranged accordingly. For instance, the sequence could be ...golang,hugo,... .
@@ -64,7 +64,7 @@ To illustrate, let's create an image named `my-image` based on `ubuntu:latest`. 
 
 > On a Linux docker engine, use the `-c | --current-user` option to generate a container user with the same USER ID as the host's user. The `-c` option adopts the current user's USER_ID and GROUP_ID, while `-s` applies 61000 (a high range ID) for both USER_ID and GROUP_ID. MacOS and Windows users need not worry about this as Docker Desktop manages access to the host's file system.
 
-### Crafting a Development Image Using the Recipe
+### Building the Development Image Using the Recipes
 Another option is to use predefined recipes for faster image crafting. Here's an example:
 
 ```sh
@@ -72,7 +72,7 @@ Another option is to use predefined recipes for faster image crafting. Here's an
 ```
 By default, the image name will be the same as the recipe name, which is `development` in this case. The layers are defined in the recipe, and the default user and initial base image are set to `dev` and `ubuntu:22.04`, respectively.
 
-### Crafting a Development Image for Multiple Platforms with Buildx
+### Building a Development Image for Multiple Platforms with Buildx
 If you're targeting multiple platforms for your image, you'll need to use the `--platform` option along with a list of the desired platforms. Here's how you can do this:
 
 ```sh
@@ -82,3 +82,11 @@ If you're targeting multiple platforms for your image, you'll need to use the `-
     --push
 ```
 The command builds the `development` recipe for both `amd64` and `arm64` architectures. Once the image is built, it will be pushed to the Docker Hub repository.
+
+### Other Examples
+Building DataScience images:
+```sh
+./build.sh -r anaconda-base \
+    && ./build.sh -r anaconda \
+    && ./build.sh -r datascience
+```
