@@ -6,7 +6,7 @@ __default_base_image="ubuntu:22.04"
 # recipe_name|layers_in_order|base_image(optional)
 function load_recipes(){
     __recipes=(
-        "development|base,python,nodejs,golang,awscli,aws_cdk,docker,shell"
+        "development|ubuntu,python,nodejs,golang,awscli,aws_cdk,docker,shell"
         "awscli|awscli,shell"
         "anaconda-base|anaconda"
         "anaconda|shell|$__registry/anaconda-base"
