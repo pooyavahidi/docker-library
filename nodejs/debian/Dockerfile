@@ -1,8 +1,6 @@
 ARG BASE_IMAGE
 FROM ${BASE_IMAGE}
 
-# Install nodejs LTS using its official source at:
-# https://github.com/nodejs/docker-node/tree/main/19/bullseye/Dockerfile
 
 RUN apt-get update \
     && apt-get install -y \
@@ -12,7 +10,9 @@ RUN apt-get update \
         xz-utils \
     && rm -rf /var/lib/apt/lists/*
 
-ENV NODE_VERSION 19.8.1
+# Install nodejs LTS using the official source at:
+# https://github.com/nodejs/docker-node
+ENV NODE_VERSION 18.16.1
 
 RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" \
     && case "${dpkgArch##*-}" in \

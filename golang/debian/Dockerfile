@@ -1,8 +1,6 @@
 ARG BASE_IMAGE=ubuntu:latest
 FROM ${BASE_IMAGE}
 
-# Based on official source at:
-# https://github.com/docker-library/golang/blob/master/1.20/bullseye/Dockerfile
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
@@ -12,6 +10,9 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 ENV PATH /usr/local/go/bin:$PATH
+
+# Install Golang using the official source at:
+# https://github.com/docker-library/golang/blob/master/1.20/bullseye/Dockerfile
 
 ENV GOLANG_VERSION 1.20.2
 
