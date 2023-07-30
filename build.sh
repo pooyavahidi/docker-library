@@ -8,7 +8,7 @@ function load_recipes(){
     __recipes=(
         "development|ubuntu,python,nodejs,golang,awscli,aws_cdk,docker,shell"
         "awscli|awscli,shell"
-        "anaconda-base|anaconda"
+        "anaconda-base|ubuntu,anaconda"
         "anaconda|shell|$__registry/anaconda-base"
         "datascience|datascience,shell|$__registry/anaconda-base"
         "hugo|hugo,shell"
