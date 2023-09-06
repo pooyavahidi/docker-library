@@ -90,3 +90,11 @@ Building DataScience images:
     && ./build.sh -r anaconda \
     && ./build.sh -r datascience
 ```
+
+### Options
+`--no-cache`
+
+Building `anaconda` recipe using `--no-cache` to force a rebuild of the image.
+```sh
+./build.sh -r anaconda --no-cache
+```

@@ -33,6 +33,7 @@ function main() {
     local __recipe_name
     local __recipe_base
     local __registry
+    local __no_cache
 
     # If no parameter is provided exit with error.
     (( $# == 0 )) && echo "Parameters must be provided." >&2 && exit 1
@@ -83,6 +84,9 @@ function main() {
             -r | --recipe)
                 shift
                 __recipe=$1
+                ;;
+            --no-cache)
+                __no_cache="--no-cache"
                 ;;
             *)
                 echo "$1 is not a supported option" >&2
@@ -164,7 +168,7 @@ function main() {
             -t ${__registry}/${__image_name}:${__image_tag} \
             --build-arg BASE_IMAGE=${__base_image} \
             --build-arg USER=${__user} \
-            ${__user_id_args} ${__platform} ${__push}
+            ${__user_id_args} ${__platform} ${__push} ${__no_cache}
 
         if (( $? != 0 )); then
             exit 1
