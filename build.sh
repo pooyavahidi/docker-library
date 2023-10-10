@@ -178,7 +178,7 @@ function main() {
     done
 
     # Prune the dangling images if building without using buildx.
-    if [[ -z __platform ]]; then
+    if [[ -z $__platform ]]; then
         docker image prune -f
     fi
 }
