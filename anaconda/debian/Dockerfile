@@ -6,8 +6,8 @@ FROM ${BASE_IMAGE}
 
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
 ENV ANACONDA_HOME /opt/anaconda3
-ENV ANACONDA_VERSION 2023.03
 ENV PATH ${ANACONDA_HOME}/bin:$PATH
+ENV ANACONDA_VERSION 2023.09-0
 
 RUN set -eux \
     && apt-get update \
@@ -29,16 +29,16 @@ RUN set -eux \
     && rm -rf /var/lib/apt/lists/*
 
 # Anaconda hashes
-# https://docs.anaconda.com/anaconda/install/hashes/lin-3-64/
+# https://docs.anaconda.com/free/anaconda/reference/hashes/lin-3-64/
 RUN dpkgArch="$(dpkg --print-architecture)"; \
     case "${dpkgArch##*-}" in \
         "amd64") \
             url="https://repo.anaconda.com/archive/Anaconda3-${ANACONDA_VERSION}-Linux-x86_64.sh"; \
-            sha256="19737d5c27b23a1d8740c5cb2414bf6253184ce745d0a912bb235a212a15e075"; \
+            sha256="6c8a4abb36fbb711dc055b7049a23bbfd61d356de9468b41c5140f8a11abd851"; \
             ;; \
         "arm64"|"aarch64") \
             url="https://repo.anaconda.com/archive/Anaconda3-${ANACONDA_VERSION}-Linux-aarch64.sh"; \
-            sha256="613797154d9383355677f7dfee10db32b2c327cbedabddcb303598f242c79883"; \
+            sha256="69ee26361c1ec974199bce5c0369e3e9a71541de7979d2b9cfa4af556d1ae0ea"; \
             ;; \
         *) echo "error: unsupported architecture ${dpkgArch}" >&2; exit 1 ;; \
     esac \
