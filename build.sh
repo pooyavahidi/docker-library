@@ -11,6 +11,7 @@ function load_recipes(){
         "anaconda-base|ubuntu,anaconda"
         "anaconda|shell|$__registry/anaconda-base"
         "datascience|datascience,shell|$__registry/anaconda-base"
+        "datascience-aws|datascience,awscli,shell|$__registry/anaconda-base"
         "hugo|hugo,shell"
     )
 }
@@ -184,4 +185,3 @@ function main() {
 }
 
 main "${@}"
-
