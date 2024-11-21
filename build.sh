@@ -1,6 +1,6 @@
 #!/bin/bash
 
-__default_base_image="ubuntu:22.04"
+__default_base_image="ubuntu:latest"
 
 # default images info in the following format:
 # recipe_name|layers_in_order|base_image(optional)

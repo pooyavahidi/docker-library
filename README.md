@@ -48,6 +48,16 @@ docker build shell/debian -t pv/ubuntu-shell \
 ## Building Images with build.sh
 The `build.sh` script is a versatile tool that you can use to craft images either on your local machine or within a cicd pipeline. Here are some examples to get you started, along with a few predefined images and their layers which can be quickly implemented.
 
+### Clean the Environment (Optional)
+To clean up the environment, the easiest way is to prune the system which deletes all the images, containers, and networks that are not being used.
+```sh
+docker system prune -a
+```
+Then, pull the ubuntu image to start fresh.
+```sh
+docker pull ubuntu:latest
+```
+
 ### Example: Development Image
 Beyond its basic functionalities, `build.sh` offers the capability to create two additional shell images on top of the `pv/dev` image. By using the `-s` option, you can add a shell layer to `pv/dev` that incorporates a container's user. Meanwhile, the `-c` option allows you to construct a shell layer with a container's user that shares the same `USER_ID` and `GROUP_ID` as the host's current user.
 
@@ -70,7 +80,15 @@ Another option is to use predefined recipes for faster image crafting. Here's an
 ```sh
 ./build.sh -r development
 ```
-By default, the image name will be the same as the recipe name, which is `development` in this case. The layers are defined in the recipe, and the default user and initial base image are set to `dev` and `ubuntu:22.04`, respectively.
+By default, the image name will be the same as the recipe name, which is `development` in this case. The layers are defined in the recipe, and the default user and initial base image are set to `dev` and `ubuntu:latest`, respectively.
+
+### Building Anaconda Images
+Building DataScience images:
+```sh
+./build.sh -r anaconda-base \
+    && ./build.sh -r anaconda \
+    && ./build.sh -r datascience
+```
 
 ### Building a Development Image for Multiple Platforms with Buildx
 If you're targeting multiple platforms for your image, you'll need to use the `--platform` option along with a list of the desired platforms. Here's how you can do this:
@@ -83,18 +101,12 @@ If you're targeting multiple platforms for your image, you'll need to use the `-
 ```
 The command builds the `development` recipe for both `amd64` and `arm64` architectures. Once the image is built, it will be pushed to the Docker Hub repository.
 
-### Other Examples
-Building DataScience images:
-```sh
-./build.sh -r anaconda-base \
-    && ./build.sh -r anaconda \
-    && ./build.sh -r datascience
-```
 
 ### Options
-`--no-cache`
 
-Building `anaconda` recipe using `--no-cache` to force a rebuild of the image.
+#### `--no-cache`
+
+Building `anaconda` recipe using `--no-cache` to force a rebuild of the image without using the docker's build cache.
 ```sh
 ./build.sh -r anaconda --no-cache
 ```

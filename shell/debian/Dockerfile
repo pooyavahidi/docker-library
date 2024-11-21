@@ -1,4 +1,4 @@
-ARG BASE_IMAGE
+ARG BASE_IMAGE=ubuntu:latest
 FROM ${BASE_IMAGE}
 
 # Install prerequisites
@@ -19,7 +19,7 @@ RUN apt-get update \
 # Internal username named `cu` short for `Container User`
 ARG USER=cu
 
-# Set both user id and group id to 61000 to make sure it's out of range of 
+# Set both user id and group id to 61000 to make sure it's out of range of
 # existing uids in the host and there would be no overlapping.
 ARG USER_ID=61000
 ARG GROUP_ID=61000
@@ -30,7 +30,7 @@ ARG ENABLE_SUDO=1
 # Create a system account with specified UID and GID without root privileges.
 # --no-log-init is to be used to avoid the known issue on the high value IDs.
 # Also chown the required directories to be owned by this new internal users.
-RUN groupadd -g ${GROUP_ID} --system ${USER} \ 
+RUN groupadd -g ${GROUP_ID} --system ${USER} \
     && useradd --no-log-init --system -u ${USER_ID} -g ${GROUP_ID} ${USER} \
     && mkdir /home/${USER} \
     && chown --recursive ${USER_ID}:${GROUP_ID} /home/${USER}
