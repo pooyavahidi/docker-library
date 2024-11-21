@@ -2,12 +2,22 @@ ARG BASE_IMAGE=ubuntu:latest
 FROM ${BASE_IMAGE}
 
 # Based on the official source at:
-# https://github.com/ContinuumIO/docker-images/blob/master/anaconda3/debian/Dockerfile
+# https://github.com/anaconda/docker-images/blob/main/anaconda3/debian/Dockerfile
 
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
-ENV ANACONDA_HOME /opt/anaconda3
-ENV PATH ${ANACONDA_HOME}/bin:$PATH
-ENV ANACONDA_VERSION 2023.09-0
+ENV ANACONDA_HOME=/opt/anaconda3
+ENV PATH=${ANACONDA_HOME}/bin:$PATH
+ENV ANACONDA_VERSION=2024.10-1
+
+# Anaconda hashes:
+# https://repo.anaconda.com/archive/
+
+# x86_64
+ARG INSTALLER_URL_AMD64="https://repo.anaconda.com/archive/Anaconda3-${ANACONDA_VERSION}-Linux-x86_64.sh"
+ARG SHA256SUM_AMD64="3ba0a298155c32fbfd80cbc238298560bf69a2df511783054adfc151b76d80d8"
+# arm64 (aarch64)
+ARG INSTALLER_URL_AARCH64="https://repo.anaconda.com/archive/Anaconda3-${ANACONDA_VERSION}-Linux-aarch64.sh"
+ARG SHA256SUM_AARCH64="489c608e8bddd2cf29dfbdd811cf99087cd6b6a0615d41c6f9058ce340594b65"
 
 RUN set -eux \
     && apt-get update \
@@ -26,19 +36,18 @@ RUN set -eux \
         libxrandr2 \
         libxrender1 \
         wget \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Anaconda hashes
-# https://docs.anaconda.com/free/anaconda/reference/hashes/lin-3-64/
 RUN dpkgArch="$(dpkg --print-architecture)"; \
     case "${dpkgArch##*-}" in \
         "amd64") \
-            url="https://repo.anaconda.com/archive/Anaconda3-${ANACONDA_VERSION}-Linux-x86_64.sh"; \
-            sha256="6c8a4abb36fbb711dc055b7049a23bbfd61d356de9468b41c5140f8a11abd851"; \
+            url="${INSTALLER_URL_AMD64}"; \
+            sha256="${SHA256SUM_AMD64}"; \
             ;; \
         "arm64"|"aarch64") \
-            url="https://repo.anaconda.com/archive/Anaconda3-${ANACONDA_VERSION}-Linux-aarch64.sh"; \
-            sha256="69ee26361c1ec974199bce5c0369e3e9a71541de7979d2b9cfa4af556d1ae0ea"; \
+            url="${INSTALLER_URL_AARCH64}"; \
+            sha256="${SHA256SUM_AARCH64}"; \
             ;; \
         *) echo "error: unsupported architecture ${dpkgArch}" >&2; exit 1 ;; \
     esac \
