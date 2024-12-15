@@ -1,4 +1,4 @@
-ARG BASE_IMAGE
+ARG BASE_IMAGE=ubuntu:latest
 FROM ${BASE_IMAGE}
 
 RUN set -eux \

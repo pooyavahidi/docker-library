@@ -1,4 +1,4 @@
-ARG BASE_IMAGE
+ARG BASE_IMAGE=ubuntu:latest
 FROM ${BASE_IMAGE}
 
 
@@ -12,7 +12,7 @@ RUN apt-get update \
 
 # Install nodejs LTS using the official source at:
 # https://github.com/nodejs/docker-node
-ENV NODE_VERSION 18.16.1
+ENV NODE_VERSION=18.16.1
 
 RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" \
     && case "${dpkgArch##*-}" in \

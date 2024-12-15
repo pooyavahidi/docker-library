@@ -74,6 +74,14 @@ To illustrate, let's create an image named `my-image` based on `ubuntu:latest`. 
 
 > On a Linux docker engine, use the `-c | --current-user` option to generate a container user with the same USER ID as the host's user. The `-c` option adopts the current user's USER_ID and GROUP_ID, while `-s` applies 61000 (a high range ID) for both USER_ID and GROUP_ID. MacOS and Windows users need not worry about this as Docker Desktop manages access to the host's file system.
 
+### Building Anaconda Images
+Building DataScience images:
+```sh
+./build.sh -r anaconda-base \
+    && ./build.sh -r anaconda \
+    && ./build.sh -r datascience
+```
+
 ### Building the Development Image Using the Recipes
 Another option is to use predefined recipes for faster image crafting. Here's an example:
 
@@ -82,13 +90,6 @@ Another option is to use predefined recipes for faster image crafting. Here's an
 ```
 By default, the image name will be the same as the recipe name, which is `development` in this case. The layers are defined in the recipe, and the default user and initial base image are set to `dev` and `ubuntu:latest`, respectively.
 
-### Building Anaconda Images
-Building DataScience images:
-```sh
-./build.sh -r anaconda-base \
-    && ./build.sh -r anaconda \
-    && ./build.sh -r datascience
-```
 
 ### Building a Development Image for Multiple Platforms with Buildx
 If you're targeting multiple platforms for your image, you'll need to use the `--platform` option along with a list of the desired platforms. Here's how you can do this:

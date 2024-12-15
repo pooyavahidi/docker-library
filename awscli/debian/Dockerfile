@@ -1,15 +1,15 @@
-ARG BASE_IMAGE
+ARG BASE_IMAGE=ubuntu:latest
 FROM ubuntu:latest as builder
 
 RUN set -eux \
 	&& apt-get update \
 	&& apt-get install -y \
-		dirmngr \                                                                                                              
+		dirmngr \
 		gnupg \
 		unzip \
 		wget
 
-WORKDIR /tmp 
+WORKDIR /tmp
 # Install AWS CLI v2
 # https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-linux.html
 
@@ -17,8 +17,8 @@ WORKDIR /tmp
 COPY awscli_public_key .
 
 RUN	set -eux; \
-	dpkgArch=$(dpkg --print-architecture); \                                                                               
-	case "${dpkgArch##-}" in \                                                                                             
+	dpkgArch=$(dpkg --print-architecture); \
+	case "${dpkgArch##-}" in \
 			"amd64") \
 				url="https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip"; \
 				;; \
@@ -31,7 +31,7 @@ RUN	set -eux; \
 	wget -O awscliv2.zip.sig "${url}.sig" --progress=dot:giga; \
 	\
 	export GNUPGHOME="$(mktemp -d)"; \
-	# Verify the signature of downloaded packages 
+	# Verify the signature of downloaded packages
 	gpg --import awscli_public_key; \
 	gpg --verify awscliv2.zip.sig awscliv2.zip; \
 	unzip -q awscliv2.zip

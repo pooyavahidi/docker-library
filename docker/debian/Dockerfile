@@ -1,4 +1,4 @@
-ARG BASE_IMAGE
+ARG BASE_IMAGE=ubuntu:latest
 FROM ${BASE_IMAGE}
 
 # Pull the docker-in-docker image and copy the docker cli to the base image.

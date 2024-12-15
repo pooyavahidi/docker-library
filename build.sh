@@ -6,7 +6,7 @@ __default_base_image="ubuntu:latest"
 # recipe_name|layers_in_order|base_image(optional)
 function load_recipes(){
     __recipes=(
-        "development|ubuntu,python,nodejs,golang,awscli,aws_cdk,docker,shell"
+        "development|nodejs,golang,awscli,aws_cdk,docker,shell|$__registry/anaconda-base"
         "awscli|awscli,shell"
         "anaconda-base|ubuntu,anaconda"
         "anaconda|shell|$__registry/anaconda-base"
