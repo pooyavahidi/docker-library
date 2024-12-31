@@ -1,9 +1,9 @@
 ARG BASE_IMAGE
-FROM golang:1.16.5-alpine3.13 as builder
+FROM golang:1.23.4-alpine3.21 as builder
 
-ARG HUGO_VERSION=v0.82.0
+ARG HUGO_VERSION=v0.140.2
 
-# Clone the gohugo and install the latest version 
+# Clone the gohugo and install the latest version
 RUN set -eux; \
     apk update; \
     apk add --no-cache --virtual .build-deps git; \

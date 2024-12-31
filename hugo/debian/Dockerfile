@@ -1,28 +1,32 @@
-ARG BASE_IMAGE
-from golang:1.16.3-buster as builder
-
-ARG HUGO_VERSION=v0.82.0
-
-# Clone the gohugo and install the latest version 
-RUN set -eux; \
-    apt-get update; \
-    apt-get install -y \
-		git; \
-    \
-	go version; \
-	git clone https://github.com/gohugoio/hugo.git /tmp/hugo; \
-	cd /tmp/hugo; \
-	git checkout tags/${HUGO_VERSION}; \
-	go install; \
-	cd /; \
-	rm -rf /tmp/hugo; \
-	\
-	hugo version; \
-	rm -rf /var/lib/apt/lists/*;
-
-# Build the final image
+ARG BASE_IMAGE=ubuntu:latest
 FROM ${BASE_IMAGE}
 
-COPY --from=builder /go/bin/ bin/
+# Using Prebuilt binaries from the official github repo.
+# More details here at https://gohugo.io/hosting-and-deployment/hosting-on-github/
+ARG HUGO_VERSION=0.140.2
+ARG URL="https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_"
+
+RUN set -eux; \
+    apt-get update \
+    && apt-get install -y \
+        wget \
+		git
+
+# Install Hugo
+RUN set -eux; \
+    dpkgArch="$(dpkg --print-architecture)"; \
+    case "${dpkgArch##*-}" in \
+        "amd64") \
+            file_name="linux-amd64.deb"; \
+            ;; \
+        "arm64") \
+            file_name="linux-arm64.deb"; \
+            ;; \
+        *) echo "error: unsupported architecture ${dpkgArch}" >&2; exit 1 ;; \
+    esac; \
+    wget -O hugo.deb "${URL}${file_name}" --progress=dot:giga \
+    && dpkg -i hugo.deb \
+    && rm hugo.deb \
+    && hugo version
 
 CMD ["/bin/bash"]
