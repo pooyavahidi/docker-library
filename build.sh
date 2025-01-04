@@ -6,13 +6,15 @@ __default_base_image="ubuntu:latest"
 # recipe_name|layers_in_order|base_image(optional)
 function load_recipes(){
     __recipes=(
-        "development|nodejs,golang,awscli,aws_cdk,docker,shell|$__registry/anaconda-base"
-        "awscli|awscli,shell"
+        "ubuntu|ubuntu,shell"
         "anaconda-base|ubuntu,anaconda"
+        "development-base|nodejs,awscli,aws_cdk,docker|$__registry/anaconda-base"
+        "development|shell|$__registry/development-base"
         "anaconda|shell|$__registry/anaconda-base"
-        "datascience|datascience,shell|$__registry/anaconda-base"
-        "datascience-aws|datascience,awscli,shell|$__registry/anaconda-base"
+        "awscli|awscli,shell"
+        "go-dev|ubuntu,golang,shell"
         "hugo|hugo,shell"
+        "hugo-dev|hugo,shell|$__registry/development-base"
     )
 }
 
@@ -109,7 +111,6 @@ function main() {
     # if that is also empty, to $DOCKERHUB_USERNAME
     : "${__registry:=${DOCKER_LOCAL_REGISTRY:-$DOCKERHUB_USERNAME}}"
     [[ -z $__registry ]] && echo "Registry must be provided." >&2 && exit 1
-
 
     # Load recipes after setting up the registry variable
     load_recipes

@@ -74,22 +74,22 @@ To illustrate, let's create an image named `my-image` based on `ubuntu:latest`. 
 
 > On a Linux docker engine, use the `-c | --current-user` option to generate a container user with the same USER ID as the host's user. The `-c` option adopts the current user's USER_ID and GROUP_ID, while `-s` applies 61000 (a high range ID) for both USER_ID and GROUP_ID. MacOS and Windows users need not worry about this as Docker Desktop manages access to the host's file system.
 
-### Building Anaconda Images
-Building DataScience images:
+### Building Multiple Images Using Recipes
+Recipes are defined in `build.sh`. They are a collection of layers that can be built on top of each other. For all recipes by default, the user is set to `dev` and the base image is `ubuntu:latest`.
+
+If a recipe is dependent on another recipe (as the base image), then the base recipe should be built first. For example, the `anaconda` recipe is dependent on the `anaconda-base` recipe. Therefore, the `anaconda-base` recipe should be built first.
+
 ```sh
-./build.sh -r anaconda-base \
+docker pull ubuntu:latest \
+    && ./build.sh -r ubuntu \
+    && ./build.sh -r anaconda-base \
     && ./build.sh -r anaconda \
-    && ./build.sh -r datascience
+    && ./build.sh -r development-base \
+    && ./build.sh -r development \
+    && ./build.sh -r hugo
+
 ```
-
-### Building the Development Image Using the Recipes
-Another option is to use predefined recipes for faster image crafting. Here's an example:
-
-```sh
-./build.sh -r development
-```
-By default, the image name will be the same as the recipe name, which is `development` in this case. The layers are defined in the recipe, and the default user and initial base image are set to `dev` and `ubuntu:latest`, respectively.
-
+Note: In above, pulling the `ubuntu:latest` image at first is optional, as `.build.sh` script will pull it if it's not already available.
 
 ### Building a Development Image for Multiple Platforms with Buildx
 If you're targeting multiple platforms for your image, you'll need to use the `--platform` option along with a list of the desired platforms. Here's how you can do this:
