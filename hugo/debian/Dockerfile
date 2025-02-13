@@ -3,7 +3,7 @@ FROM ${BASE_IMAGE}
 
 # Using Prebuilt binaries from the official github repo.
 # More details here at https://github.com/gohugoio/hugo/releases
-ARG HUGO_VERSION=0.140.2
+ARG HUGO_VERSION=0.143.1
 ARG URL="https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_extended_${HUGO_VERSION}_linux-"
 
 RUN set -eux; \
@@ -18,11 +18,11 @@ RUN set -eux; \
     case "${dpkgArch##*-}" in \
         "amd64") \
             arch="amd64"; \
-            sha256="fe765fa8ad9d43bc13e64ee27e0b45d55182b8cf298c5bca2e46cc0889e6826c"; \
+            sha256="2681aadfc2e33f0b67343f1994e406955f54522ad973f1e307ebe441ef0eefb6"; \
             ;; \
         "arm64") \
             arch="arm64"; \
-            sha256="df045d91abc7ca58906447af560b0cfcedaad3059275d0de5f6725bf594c3114"; \
+            sha256="fa749ab5b8d03f0e756ab3f62be273d68a6db677d8944c540eece3821c669ed6"; \
             ;; \
         *) echo "error: unsupported architecture ${dpkgArch}" >&2; exit 1 ;; \
     esac; \
@@ -30,6 +30,6 @@ RUN set -eux; \
     && echo "$sha256 hugo.deb" | sha256sum --strict --check - \
     && dpkg -i hugo.deb \
     && rm hugo.deb \
-    && hugo version
+    && hugo version | grep v${HUGO_VERSION}
 
 CMD ["/bin/bash"]
